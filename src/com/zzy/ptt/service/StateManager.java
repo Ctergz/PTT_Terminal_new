@@ -32,17 +32,15 @@ import com.zzy.ptt.util.PTTConstant;
  * 
  */
 public class StateManager {
-	
+
 	public enum EnumRegByWho {
-		REG_BY_USER,
-		REG_BY_CM,
-		REG_BY_ERRORCODE
+		REG_BY_USER, REG_BY_CM, REG_BY_ERRORCODE
 	}
 
 	public static boolean debugFlag = false;
-	
+
 	public static boolean exitFlag = false;
-	
+
 	/* The current registeration state */
 	private static EnumLoginState currentRegisterState = EnumLoginState.UNREGISTERED;
 	/* The current cm state */
@@ -52,34 +50,40 @@ public class StateManager {
 
 	private static Notification notification = null;
 	private static NotificationManager nm;
-	
-	//add by wangjunhui
+
+	// add by wangjunhui
 	private static PendingIntent pendingIntent;
 	public static boolean isStopped = false;
 	private static Context context;
 	private static PendingIntent contentIntent;
-	
+
 	private static final String LOG_TAG = "StateManager";
-	
+
 	private static PowerManager.WakeLock sPttWakeLock;
-	
+
 	private static KeyguardManager.KeyguardLock sPttKeyguardLock;
-	
+
 	private static boolean bEarphone;
-	
+
 	private static boolean bGrpRecived;
-	
+
 	private static EnumRegByWho regStarter;
-	
-	//edit by wangjunhui
-		public static void initNotification(Context context, String ticker, String title, String msg) {
-			StateManager.context = context;
-			if (notification == null) {
-				notification = new Notification(R.drawable.register_ing, ticker,
+
+	// edit by wangjunhui
+	public static void initNotification(Context context, String ticker,
+			String title, String msg) {
+		StateManager.context = context;
+		if (notification == null) {
+			if (PTTService.instance.isUseHBIcon()) {
+				notification = new Notification(R.drawable.login_hb_register_ing, ticker,
+						System.currentTimeMillis());
+			} else {
+				notification = new Notification(R.drawable.login_register_ing, ticker,
 						System.currentTimeMillis());
 			}
-			startNotificationThread();
 		}
+		startNotificationThread();
+	}
 
 	public static EnumLoginState getCurrentRegState() {
 		return currentRegisterState;
@@ -87,29 +91,46 @@ public class StateManager {
 
 	public static void setCurrentRegState(EnumLoginState state) {
 
-		Log.d("StateManager", "setCurrentRegState state : " + state + "notification == null : "
-				+ (notification == null));
+		Log.d("StateManager", "setCurrentRegState state : " + state
+				+ "notification == null : " + (notification == null));
 		if (notification == null) {
-			notification = new Notification(R.drawable.register_not, "PTT",
-					System.currentTimeMillis());
+			if (PTTService.instance.isUseHBIcon()) {
+				notification = new Notification(R.drawable.login_hb_register_not, "PTT",
+						System.currentTimeMillis());
+			} else {
+				notification = new Notification(R.drawable.login_register_not, "PTT",
+						System.currentTimeMillis());
+			}
 		}
 		currentRegisterState = state;
 		switch (state) {
 		case UNREGISTERED:
 		case ERROR_CODE_NUMBER:
-			notification.icon = R.drawable.register_not;
+			if (PTTService.instance.isUseHBIcon()) {
+				notification.icon = R.drawable.login_hb_register_not;
+			} else {
+				notification.icon = R.drawable.login_register_not;
+			}
 			if (PTTService.instance != null) {
 				PTTService.instance.stopNotificationPicture();
 			}
 			break;
 		case REGISTERING:
-			notification.icon = R.drawable.register_ing;
+			if (PTTService.instance.isUseHBIcon()) {
+				notification.icon = R.drawable.login_hb_register_ing;
+			} else {
+				notification.icon = R.drawable.login_register_ing;
+			}
 			if (PTTService.instance != null) {
 				PTTService.instance.stopNotificationPicture();
 			}
 			break;
 		case REGISTERE_SUCCESS:
-			notification.icon = R.drawable.register_success;
+			if (PTTService.instance.isUseHBIcon()) {
+				notification.icon = R.drawable.login_hb_register_success;
+			} else {
+				notification.icon = R.drawable.login_register_success;
+			}
 			break;
 		default:
 			break;
@@ -118,22 +139,25 @@ public class StateManager {
 			nm.notify(R.string.app_name, notification);
 		}
 	}
-	
-	//add by wangjunhui
+
+	// add by wangjunhui
 	public static void stopNotification() {
 		isStopped = true;
-		if(nm != null)
+		if (nm != null)
 			nm.cancel(R.string.app_name);
 	}
-	//add by wangjunhui
+
+	// add by wangjunhui
 	public static PendingIntent getPendingIntent() {
 		return pendingIntent;
 	}
-	//add by wangjunhui
+
+	// add by wangjunhui
 	public static void setPendingIntent(PendingIntent pendingIntent) {
 		StateManager.pendingIntent = pendingIntent;
 	}
-	//add by wangjunhui
+
+	// add by wangjunhui
 	public static void setNotification(Notification notification) {
 		StateManager.notification = notification;
 	}
@@ -165,15 +189,15 @@ public class StateManager {
 	public static void reset() {
 		currentRegisterState = EnumLoginState.UNREGISTERED;
 		initState = PTTConstant.INIT_NOT;
-		//cmState = PTTConstant.CM_DISCONNECTED;
-		//-----add by wangjunhui
+		// cmState = PTTConstant.CM_DISCONNECTED;
+		// -----add by wangjunhui
 		stopNotification();
 		nm = null;
 		notification = null;
 		releaseWakeLock();
 	}
-	
-	//-----add by wangjunhui
+
+	// -----add by wangjunhui
 	public static void startNotificationThread() {
 		isStopped = false;
 		ContextWrapper cw = new ContextWrapper(context);
@@ -183,13 +207,18 @@ public class StateManager {
 		notification.contentView = contentView;
 		notification.contentIntent = contentIntent;
 		notification.flags = Notification.FLAG_ONGOING_EVENT;
-		notification.icon = R.drawable.register_ing;
+		if (PTTService.instance.isUseHBIcon()) {
+			notification.icon = R.drawable.login_hb_register_ing;
+		} else {
+			notification.icon = R.drawable.login_register_ing;
+		}
 		notification.iconLevel = 0;
-		//nm.notify(R.string.app_name, notification);
+		// nm.notify(R.string.app_name, notification);
 		Thread thread = new Thread(new MyThread());
 		thread.start();
 	}
-	//-----add by wangjunhui
+
+	// -----add by wangjunhui
 	static class MyThread implements Runnable {
 
 		@Override
@@ -206,7 +235,8 @@ public class StateManager {
 		}
 
 	}
-	//-----add by wangjunhui
+
+	// -----add by wangjunhui
 	private static Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -217,7 +247,7 @@ public class StateManager {
 				} else {
 					notification.iconLevel = 0;
 				}
-				if(nm != null){
+				if (nm != null) {
 					if (!isStopped) {
 						nm.notify(R.string.app_name, notification);
 					} else {
@@ -227,33 +257,36 @@ public class StateManager {
 			}
 		}
 	};
-	
-	public static void acquireWakeLock(Context context){
-		
+
+	public static void acquireWakeLock(Context context) {
+
 		Log.d(LOG_TAG, ">>>>>>>accquire cpu wake lock");
-		if(sPttWakeLock == null){
-            Log.d(LOG_TAG, "accquire cpu wake lock<<<<<<<<<<<");
-            PowerManager pm= (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-            sPttWakeLock =  pm.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.SCREEN_BRIGHT_WAKE_LOCK, LOG_TAG);
-            sPttWakeLock.acquire();
+		if (sPttWakeLock == null) {
+			Log.d(LOG_TAG, "accquire cpu wake lock<<<<<<<<<<<");
+			PowerManager pm = (PowerManager) context
+					.getSystemService(Context.POWER_SERVICE);
+			sPttWakeLock = pm.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP
+					| PowerManager.SCREEN_BRIGHT_WAKE_LOCK, LOG_TAG);
+			sPttWakeLock.acquire();
 			return;
 		}
 
 		if (sPttKeyguardLock == null) {
-			KeyguardManager km = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+			KeyguardManager km = (KeyguardManager) context
+					.getSystemService(Context.KEYGUARD_SERVICE);
 			sPttKeyguardLock = km.newKeyguardLock(LOG_TAG);
 			sPttKeyguardLock.disableKeyguard();
 			Log.i("wwwangjh", "acquireWakeLock disableKeyguard()...");
 		}
 	}
-	
-	public static void releaseWakeLock(){
-        Log.d(LOG_TAG, ">>>>>>>release cpu wake lock");
-		if(sPttWakeLock != null && sPttWakeLock.isHeld()){
+
+	public static void releaseWakeLock() {
+		Log.d(LOG_TAG, ">>>>>>>release cpu wake lock");
+		if (sPttWakeLock != null && sPttWakeLock.isHeld()) {
 			sPttWakeLock.release();
 			sPttWakeLock = null;
 		}
-		if(sPttKeyguardLock != null){
+		if (sPttKeyguardLock != null) {
 			sPttKeyguardLock.reenableKeyguard();
 			sPttKeyguardLock = null;
 		}

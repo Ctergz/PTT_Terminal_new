@@ -1555,5 +1555,9 @@ public class PTTService extends Service {
 
 		manager.cancel(1);
 	}
+	
+	public boolean isUseHBIcon() {
+		return instance.getResources().getBoolean(R.bool.hb_icon);
+	}
 
 }

@@ -7,9 +7,11 @@ import android.view.Window;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.zzy.ptt.R;
+import com.zzy.ptt.service.PTTService;
 
 public class StartActivity extends Activity {
 	@Override
@@ -18,6 +20,9 @@ public class StartActivity extends Activity {
 
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		this.setContentView(R.layout.activity_start);
+		RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.welcome_icon);
+		//relativeLayout.setBackgroundResource(R.drawable.hbwelcome);
+		relativeLayout.setBackgroundResource(R.drawable.welcome);
 		TextView ivlogo2 = (TextView) this.findViewById(R.id.textlogo2);
 		AlphaAnimation aa = new AlphaAnimation(0.1f, 1.0f);
 		aa.setDuration(1000);

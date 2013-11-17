@@ -139,9 +139,9 @@ public class PTTUtil {
 		sipServer.setPort(prefs.getString(PTTConstant.SP_PORT, "5060"));
 		return sipServer;
 	}
-	
-	public boolean checkIP(String ipAddr){
-		if(isStrBlank(ipAddr)){
+
+	public boolean checkIP(String ipAddr) {
+		if (isStrBlank(ipAddr)) {
 			return false;
 		}
 		String regular = "\\b((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\b";
@@ -277,10 +277,11 @@ public class PTTUtil {
 	}
 
 	public String getCurrentUserName(Context context) {
-		if(PTTConstant.DUMMY) {
+		if (PTTConstant.DUMMY) {
 			return "10008";
 		}
-		return PreferenceManager.getDefaultSharedPreferences(context).getString(PTTConstant.SP_USERNAME, "");
+		return PreferenceManager.getDefaultSharedPreferences(context)
+				.getString(PTTConstant.SP_USERNAME, "");
 	}
 
 	public String getFirstRingName(Resources res, String start) {
@@ -350,7 +351,7 @@ public class PTTUtil {
 		}
 
 		if (debug) {
-			Log.d(logTag, "sxsexe>>"+msg);
+			Log.d(logTag, "sxsexe>>" + msg);
 		}
 	}
 
@@ -400,9 +401,9 @@ public class PTTUtil {
 		case PTTConstant.PTT_WAITING:
 			strStatus = "PTT_WAITING";
 			break;
-		 case PTTConstant.PTT_INIT:
-		 strStatus = "PTT_INIT";
-		 break;
+		case PTTConstant.PTT_INIT:
+			strStatus = "PTT_INIT";
+			break;
 		case PTTConstant.PTT_BUSY:
 			strStatus = "PTT_ACCEPTED";
 			break;
@@ -565,27 +566,30 @@ public class PTTUtil {
 	 * @param bError
 	 *            true : error , false : status
 	 */
-	public void errorAlert(final Context context, final int errorCode, final String errroMsg, final boolean bError) {
+	public void errorAlert(final Context context, final int errorCode,
+			final String errroMsg, final boolean bError) {
 		boolean appStatrt = checkAppStarted();
 		boolean isBackground = checkIsBackground();
-		
-		printLog(true, "PTTUtil", "start activity AlertActivity " + appStatrt + " isBackground " + isBackground + " exit " + StateManager.exitFlag);
+
+		printLog(true, "PTTUtil", "start activity AlertActivity " + appStatrt
+				+ " isBackground " + isBackground + " exit "
+				+ StateManager.exitFlag);
 		if (appStatrt) {
 			return;
 		}
 
-//		if (isBackground) {
-//			return;
-//		}
-		
-		if(StateManager.exitFlag)
+		// if (isBackground) {
+		// return;
+		// }
+
+		if (StateManager.exitFlag)
 			return;
 
 		String msg = getErrorMsg(errorCode);
 		if (msg == null) {
 			msg = errroMsg;
 		}
-		
+
 		Intent intent = new Intent();
 		intent.setClass(context, AlertActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -596,7 +600,8 @@ public class PTTUtil {
 
 	}
 
-	public void msgAlert(final Context context, final String errroMsg, final boolean bError) {
+	public void msgAlert(final Context context, final String errroMsg,
+			final boolean bError) {
 		if (checkAppStarted()) {
 			return;
 		}
@@ -616,7 +621,8 @@ public class PTTUtil {
 	}
 
 	public void errorToast(Context context, int errorCode, String errorMsg) {
-		Toast.makeText(context, errorCode + " " + errorMsg, Toast.LENGTH_LONG).show();
+		Toast.makeText(context, errorCode + " " + errorMsg, Toast.LENGTH_LONG)
+				.show();
 	}
 
 	public void msgToast(Context context, String msg) {
@@ -635,7 +641,8 @@ public class PTTUtil {
 		if (isStrBlank(speaker)) {
 			return false;
 		}
-		String user = getSipUserFromPrefs(PTTService.instance.prefs).getUsername();
+		String user = getSipUserFromPrefs(PTTService.instance.prefs)
+				.getUsername();
 		return speaker.equals(user);
 	}
 
@@ -680,12 +687,14 @@ public class PTTUtil {
 
 	public GroupInfo getCurrentGroupInfo() {
 		GroupInfo groupInfo = null;
-		String num = PTTService.instance.prefs.getString(PTTConstant.SP_CURR_GRP_NUM, null);
+		String num = PTTService.instance.prefs.getString(
+				PTTConstant.SP_CURR_GRP_NUM, null);
 		if (num == null || num.trim().length() == 0) {
 			return null;
 		}
 
-		List<GroupInfo> lstGroupData = GroupManager.getInstance().getGroupData();
+		List<GroupInfo> lstGroupData = GroupManager.getInstance()
+				.getGroupData();
 		if (lstGroupData == null || lstGroupData.size() == 0) {
 			return null;
 		}
@@ -716,9 +725,11 @@ public class PTTUtil {
 		if (callNum == null || callNum.trim().length() == 0) {
 			return false;
 		}
-		List<GroupInfo> lstGroupData = GroupManager.getInstance().getGroupData();
+		List<GroupInfo> lstGroupData = GroupManager.getInstance()
+				.getGroupData();
 		if (lstGroupData == null || lstGroupData.size() == 0) {
-			printLog(true, LOG_TAG, "-----------Find Group Data is NULL-----------");
+			printLog(true, LOG_TAG,
+					"-----------Find Group Data is NULL-----------");
 			return false;
 		}
 		int iSize = lstGroupData.size();
@@ -733,7 +744,8 @@ public class PTTUtil {
 	}
 
 	public boolean checkSettingIsOn() {
-		return SettingActivity.instance != null || SettingDetailActivity.instance != null;
+		return SettingActivity.instance != null
+				|| SettingDetailActivity.instance != null;
 	}
 
 	public void regErrorAlert(int errorCode, String errorMessage) {
@@ -807,4 +819,5 @@ public class PTTUtil {
 		else
 			return false;
 	}
+
 }
