@@ -21,10 +21,12 @@ import android.util.Xml;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.zzy.ptt.R;
 import com.zzy.ptt.model.VersionInfo;
+import com.zzy.ptt.service.PTTService;
 
 /**
  * @author wangjunhui
@@ -36,6 +38,15 @@ public class AboutActivity extends BaseActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.aboutptt);
+
+		ImageView imageView = (ImageView) findViewById(R.id.imageView1);
+
+		if (PTTService.instance.isUseHBIcon()) {
+			imageView.setBackgroundResource(R.drawable.hbptt);
+		} else {
+			imageView.setBackgroundResource(R.drawable.ptt);
+		}
+
 		List<VersionInfo> list = parse();
 		VersionInfo currentVersion = list.get(0);
 		String version = currentVersion.getVersion();
@@ -44,15 +55,16 @@ public class AboutActivity extends BaseActivity {
 		TextView versiontv = (TextView) findViewById(R.id.textViewversion);
 		TextView buildtimetv = (TextView) findViewById(R.id.textViewbuildtime);
 		versiontv.setText(versiontv.getText() + version);
-		buildtimetv.setText(getApplicationContext().getString(R.string.aboutv5) + build_time);
+		buildtimetv.setText(getApplicationContext().getString(R.string.aboutv5)
+				+ build_time);
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_ptt, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		finish();
@@ -84,7 +96,8 @@ public class AboutActivity extends BaseActivity {
 					String tagName = parser.getName();
 					if (tagName != null && tagName.equals("version")) {
 						currentVersion = new VersionInfo();
-						int id = Integer.parseInt(parser.getAttributeValue(null, "id"));
+						int id = Integer.parseInt(parser.getAttributeValue(
+								null, "id"));
 						currentVersion.setId(id);
 					}
 
