@@ -609,20 +609,20 @@ public class CallLogTabActivity extends TabActivity implements TabContentFactory
 		if (item.getItemId() == R.id.log_back) {
 			finish();
 		}
-		int itemIndex = item.getItemId();
+//		int itemIndex = item.getItemId();
 		HashMap<String, Object> map;
-		if (itemIndex != MENU_DELETE_ALL) {
-			if (listPosition < 0) {
-//				alertErrorMsg("None selected");
-				return true;
-			}
-			map = (HashMap<String, Object>) adapter.getItem(listPosition);
-		} else {
-			if (listPosition < 0 && adapter.getCount() == 0) {
+//		if (itemIndex != MENU_DELETE_ALL) {
+//			if (listPosition < 0) {
+////				alertErrorMsg("None selected");
+//				return true;
+//			}
+//			map = (HashMap<String, Object>) adapter.getItem(listPosition);
+//		} else {
+			if (adapter.getCount() <= 0) {
 				return true;
 			}
 			map = (HashMap<String, Object>) adapter.getItem(0);
-		}
+//		}
 		if (adapter.getCount() <= 0) {
 //			alertErrorMsg("None selected");
 			return true;
@@ -631,8 +631,17 @@ public class CallLogTabActivity extends TabActivity implements TabContentFactory
 		if (map == null) {
 			return true;
 		}
+		if (item.getItemId() == R.id.log_delete_all) {
+			if (tabHost.getCurrentTab() == 3) {
+				deleteAllLog();
+				new DBHelper(this).resetIndex();
+			} else {
+				deleteTabAllLog(map);
+				new DBHelper(this).resetIndex();
+			}
+		}
 
-		switch (itemIndex) {
+//		switch (itemIndex) {
 //		case MENU_CALL:
 //			String num = (String) map.get(PTTConstant.TABLE_CALLLOG_NUM);
 //			if (num == null || num.trim().length() == 0) {
@@ -655,18 +664,18 @@ public class CallLogTabActivity extends TabActivity implements TabContentFactory
 //			deleteLog(map);
 //			new DBHelper(this).resetIndex();
 //			break;
-		case R.id.log_delete_all:
-			if (tabHost.getCurrentTab() == 3) {
-				deleteAllLog();
-				new DBHelper(this).resetIndex();
-			} else {
-				deleteTabAllLog(map);
-				new DBHelper(this).resetIndex();
-			}
-			break;
-		default:
-			break;
-		}
+//		case R.id.log_delete_all:
+//			if (tabHost.getCurrentTab() == 3) {
+//				deleteAllLog();
+//				new DBHelper(this).resetIndex();
+//			} else {
+//				deleteTabAllLog(map);
+//				new DBHelper(this).resetIndex();
+//			}
+//			break;
+//		default:
+//			break;
+//		}
 
 		return super.onOptionsItemSelected(item);
 	}
