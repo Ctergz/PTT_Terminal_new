@@ -11,7 +11,11 @@
 
 package com.zzy.ptt.ui;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -29,6 +33,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -37,8 +42,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.zzy.ptt.R;
+import com.zzy.ptt.exception.PTTException;
 import com.zzy.ptt.model.EnumLoginState;
 import com.zzy.ptt.model.GroupInfo;
+import com.zzy.ptt.model.MemberInfo;
+import com.zzy.ptt.proxy.SipProxy;
 import com.zzy.ptt.service.CallStateManager;
 import com.zzy.ptt.service.GroupManager;
 import com.zzy.ptt.service.PTTService;
@@ -75,6 +83,15 @@ public class MainPageActivity extends Activity implements View.OnClickListener {
 
 	private SharedPreferences sp;
 	private GroupReceiver groupReceiver;
+
+	private Map<String, MemberInfo[]> groupInfoMap;
+	private Map<String, Integer> groupStatusMap;
+	private Map<String, String> groupNameMap;
+	private List<GroupInfo> lstGroupData;
+	private String[] groups;
+	private String[] groupString;
+	private MemberInfo[][] memberInfos;
+	private String[][] memberInfoString;
 
 	public Handler mainPageHandler = new Handler() {
 
@@ -218,6 +235,11 @@ public class MainPageActivity extends Activity implements View.OnClickListener {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.mainpage);
 
+		groupInfoMap = new HashMap<String, MemberInfo[]>();
+		groupStatusMap = new HashMap<String, Integer>();
+		groupNameMap = new HashMap<String, String>();
+		lstGroupData = new ArrayList<GroupInfo>();
+		
 		sp = PreferenceManager.getDefaultSharedPreferences(this);
 
 		initButtons();
@@ -244,6 +266,7 @@ public class MainPageActivity extends Activity implements View.OnClickListener {
 
 		groupReceiver = new GroupReceiver();
 		IntentFilter filter = new IntentFilter();
+		filter.addAction(PTTConstant.ACTION_MEMBERS_INFO);
 		filter.addAction(PTTConstant.ACTION_DYNAMIC_REGRP);
 		this.registerReceiver(groupReceiver, filter);
 
@@ -257,7 +280,58 @@ public class MainPageActivity extends Activity implements View.OnClickListener {
 	private class GroupReceiver extends BroadcastReceiver {
 
 		public void onReceive(Context context, Intent intent) {
-			updateReisterInfo();
+			String action = intent.getAction();
+			if (PTTConstant.ACTION_MEMBERS_INFO.equals(action)) {
+				freshView();
+			}
+			if (PTTConstant.ACTION_DYNAMIC_REGRP.equals(action)) {
+				updateReisterInfo();
+			}
+		}
+	}
+
+	public void freshView() {
+
+		try {
+			groupInfoMap = GroupManager.getInstance().getGroupNumMebersMap();
+			lstGroupData = GroupManager.getInstance().getGroupData();
+			if (lstGroupData.size() > 0 && groupInfoMap.size() > 0) {
+
+				groups = new String[lstGroupData.size()];
+				groupString = new String[lstGroupData.size()];
+				memberInfos = new MemberInfo[groupInfoMap.size()][];
+				memberInfoString = new String[groupInfoMap.size()][];
+
+				for (int i = 0; i < lstGroupData.size(); i++) {
+					groupString[i] = lstGroupData.get(i).getNumber() + "--("
+							+ lstGroupData.get(i).getName() + ")";
+					groups[i] = lstGroupData.get(i).getNumber();
+					memberInfos[i] = groupInfoMap.get(groups[i]);
+					Arrays.sort(memberInfos[i]);
+				}
+
+				for (int i = 0; i < groupInfoMap.size(); i++) {
+					memberInfoString[i] = new String[memberInfos[i].length];
+					for (int j = 0; j < memberInfos[i].length; j++) {
+						String mebNum = memberInfos[i][j].getNumber();
+						String mebName = memberInfos[i][j].getName();
+						int mebStatus = memberInfos[i][j].getStatus();
+						groupStatusMap.put(mebNum, mebStatus);
+						groupNameMap.put(mebNum, mebName);
+						memberInfoString[i][j] = mebNum;
+					}
+				}
+			}
+			String mebNum = PTTUtil.getInstance().getCurrentUserName(this);
+			if (!TextUtils.isEmpty(mebNum)) {
+				String mebName = groupNameMap.get(mebNum);
+				statusTV1.setText(getApplicationContext().getString(
+						R.string.current_num)
+						+ mebName);
+			}
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 	}
 
@@ -305,12 +379,25 @@ public class MainPageActivity extends Activity implements View.OnClickListener {
 		}
 		if (state == PTTConstant.REG_ED) {
 			titleInfo = PTTUtil.getInstance().getCurrentUserName(this);
-			statusTV.setText(getApplicationContext().getString(
-					R.string.current_group)
-					+ curGrp);
+			if (TextUtils.isEmpty(curGrp)) {
+				statusTV.setText(getApplicationContext().getString(
+						R.string.current_group)
+						+ curGrp);
+			} else {
+				String groupName = GroupManager.getInstance()
+						.getGroupInfo(curGrp).getName();
+				statusTV.setText(getApplicationContext().getString(
+						R.string.current_group)
+						+ groupName);
+			}
 			statusTV1.setText(getApplicationContext().getString(
 					R.string.current_num)
 					+ titleInfo);
+			try {
+				SipProxy.getInstance().RequestGetMember(curGrp);
+			} catch (PTTException e) {
+				e.printStackTrace();
+			}
 		} else {
 			titleInfo = getString(PTTUtil.getInstance().getTitleId(state));
 			statusTV.setText("");
@@ -334,15 +421,27 @@ public class MainPageActivity extends Activity implements View.OnClickListener {
 				curGrp = "";
 			}
 		}
-
 		if (currentState == EnumLoginState.REGISTERE_SUCCESS) {
 			titleInfo = PTTUtil.getInstance().getCurrentUserName(this);
-			statusTV.setText(getApplicationContext().getString(
-					R.string.current_group)
-					+ curGrp);
+			if (TextUtils.isEmpty(curGrp)) {
+				statusTV.setText(getApplicationContext().getString(
+						R.string.current_group)
+						+ curGrp);
+			} else {
+				String groupName = GroupManager.getInstance()
+						.getGroupInfo(curGrp).getName();
+				statusTV.setText(getApplicationContext().getString(
+						R.string.current_group)
+						+ groupName);
+			}
 			statusTV1.setText(getApplicationContext().getString(
 					R.string.current_num)
 					+ titleInfo);
+			try {
+				SipProxy.getInstance().RequestGetMember(curGrp);
+			} catch (PTTException e) {
+				e.printStackTrace();
+			}
 		} else {
 			titleInfo = getString(PTTUtil.getInstance()
 					.getTitleId(currentState));
