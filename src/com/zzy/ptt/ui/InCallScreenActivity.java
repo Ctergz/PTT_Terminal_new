@@ -12,6 +12,8 @@
 package com.zzy.ptt.ui;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -42,6 +44,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.zzy.ptt.R;
+import com.zzy.ptt.db.ContactUserCl;
 import com.zzy.ptt.exception.PTTException;
 import com.zzy.ptt.model.CallLog;
 import com.zzy.ptt.model.CallState;
@@ -95,6 +98,13 @@ public class InCallScreenActivity extends BaseActivity {
 	private boolean isOtherHangUP = false;
 	
 	private LinearLayout timeLinearLayout,anserCallLayout;
+	
+	private ArrayList<HashMap<String, String>> userlistinit;
+	private ContactUserCl ubc = null;
+	private int totalNum;// contact num
+	private HashMap<String, String> map = null;
+	private String callerName = null;
+	private String callerNumber = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -173,6 +183,23 @@ public class InCallScreenActivity extends BaseActivity {
 				hangup();
 			}
 		});
+		
+		ubc = new ContactUserCl(this);
+		userlistinit = ubc.getUserListInit();
+		totalNum = ubc.getTotalUserNum("");
+		if (totalNum > 0 && userlistinit.size() > 0) {
+			for (int i = 0; i < userlistinit.size(); i++) {
+				map = userlistinit.get(i);
+				if (callerNumber != null && callerNumber.equals((String) map.get("cellphone"))) {
+					callerName = (String) map.get("userName");
+				}
+			}
+		}
+		if (callerName != null) {
+			tvNumber.setText(callerName);
+		}else {
+			tvNumber.setText(callerNumber);
+		}
 	}
 
 	private void initCallLog() {
@@ -497,7 +524,8 @@ public class InCallScreenActivity extends BaseActivity {
 	}
 
 	private void showCallNumber(CallState tempCallState) {
-		tvNumber.setText(tempCallState.getNumber());
+		callerNumber = tempCallState.getNumber();
+		//tvNumber.setText(callerNumber);
 	}
 
 	@Override
