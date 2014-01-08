@@ -106,6 +106,9 @@ public class AlertActivity extends Activity implements OnClickListener {
 				: getString(R.string.alert_msg_status_msg));
 
 		tvMsg.setText(errorMsgLabel + " : " + errorMsg);
+		if (tvMsg.getText().toString().contains(getString(R.string.alert_msg_registerinfo_null))) {
+			tvMsg.setText(errorMsg);
+		}
 		tvErrorcode.setText(errorCodeLabel + " : " + currentError);
 
 		PTTUtil.getInstance().printLog(true, LOG_TAG, currentError + ", " + errorMsg);

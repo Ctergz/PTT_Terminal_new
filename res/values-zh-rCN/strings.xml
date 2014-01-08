@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
 
-    <string name="app_name">对讲机</string>
+    <string name="app_name">易迅通</string>
     <!-- Button -->
     <string name="btn_register">注册</string>
     <string name="btn_makecall">拨号</string>
@@ -74,9 +74,9 @@
     <string name="setting_register_ip_false">IP格式错误</string>
     <string name="setting_debug_switch">调试模式</string>
     <!-- notification -->
-    <string name="notify_title">PTT</string>
-    <string name="notify_content">调度终端</string>
-    <string name="notify_ticker">调度终端</string>
+    <string name="notify_title">易迅通</string>
+    <string name="notify_content">易迅通</string>
+    <string name="notify_ticker">易迅通</string>
     <!-- menu -->
     <string name="menu_return">返回</string>
     <string name="menu_speaker">免提</string>
@@ -108,7 +108,7 @@
     <string name="alert_msg_password_null">密码未设置</string>
     <string name="alert_msg_server_wrong">服务器信息配置出错</string>
     <string name="alert_msg_user_wrong">用户信息配置出错</string>
-    <string name="alert_msg_registerinfo_null">注册信息不得为空</string>
+    <string name="alert_msg_registerinfo_null">首次登陆，请进行软件注册</string>
     <string name="alert_msg_registering">正在注册</string>
     <string name="alert_msg_initing">正在初始化</string>
     <string name="alert_msg_exiting">正在退出</string>
@@ -286,7 +286,7 @@
     <string name="ptt_getting">正在获取</string>
     <!-- about -->
     <string name="aboutpyy">关于</string>
-    <string name="aboutv1">PTT软件–版本</string>
+    <string name="aboutv1">易迅通–版本</string>
     <string name="aboutv2"></string>
     <string name="aboutv3"></string>
     <string name="aboutv4"></string>
